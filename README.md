@@ -1,2 +1,3 @@
 # NutriaSplash
-StartupWeekend Smart Games 
+StartupWeekend Smart Games project
+

@@ -13,7 +13,7 @@
 #define ARC4RANDOM_MAX 0x100000000
 
 @implementation Gameplay{
-    CCButton* _playButton;
+    CCButton* _playButton; // Temporal button
     // Spritebuilder set nodes
     CCPhysicsNode *_physicsNode;
     CCLabelTTF *_fishCountLabel, *_nutriaCountLabel, *_timeCountLabel;
@@ -39,6 +39,7 @@
 -(void)didLoadFromCCB{
     //_physicsNode.debugDraw = TRUE;
     _physicsNode.collisionDelegate = self;
+    _physicsNode.name = @"physicsNode";
     phSize = _physicsNode.boundingBox.size;
     
     // Reading/Setting level
@@ -76,6 +77,7 @@
     [_physicsNode.space setDamping:newDamp];
 }
 
+// Adding Pools randomly
 -(void)settingLevel {
     // Random positions for Pools
     pools = [NSMutableArray array];
@@ -88,37 +90,66 @@
         
         int rndPosition;
         // random position
-        rndPosition = 10 + arc4random() % (430);
+        rndPosition = 40 + arc4random() % (400);
         x = rndPosition;
-        rndPosition = 20 + arc4random() % (230);
+        rndPosition = 30 + arc4random() % (210);
         y = rndPosition;
         
         // setting the position
         CGPoint thisPosition = ccp(x, y);
         
         Pool* pool = (Pool*)[CCBReader load:@"Pool"];
-        [pool convertPositionToPoints:self.position type:CCPositionTypePoints];
+        pool.positionType = CCPositionTypePoints;
         pool.position = thisPosition;
         [_physicsNode addChild: pool];
+        if (CGRectContainsRect(_physicsNode.boundingBox, pool.boundingBox))
+            pool.position = ccp(100,100);
         [pools addObject:pool];
     }
+    // Checking there are no intersections
+    [self checkPoolsPosition];
     
-    // Randoms Pools for Nutrias
+    // Pools for Nutrias
+    int numPool = 0;
     nutrias = [NSMutableArray array];
     for (int j = 0 ; j<_totalNutrias; j++) {
         Nutria* otter = (Nutria*)[CCBReader load:@"Nutria"];
-        Pool* thisPool;
-        do{
-            int rndPool = 0 + arc4random()%(_totalPools);
-            thisPool = (Pool*)[pools objectAtIndex:rndPool];
-            [thisPool setNutria:otter];
-        } while(thisPool.lola == NULL);
-            
+        Pool* thisPool = (Pool*)[pools objectAtIndex:numPool];
+        [thisPool setNutria:otter];
+        numPool++;
     }
+}
+
+// Checking there are no intersections between pools
+-(void)checkPoolsPosition {
+    
+    CGPoint newPos;
+    int rndPosition, x=0, y=0;
+    // random position
+    int sth = 0;
+    do{
+        for (int i = 0; i<_totalPools; i++) {
+            Pool *thisPool = (Pool*)[pools objectAtIndex:i];
+            for (Pool *toCompare in pools) {
+                if (![toCompare isEqual:thisPool]) {
+                    if (CGRectIntersectsRect(thisPool.boundingBox, toCompare.boundingBox)) {
+                        rndPosition = 40 + arc4random() % (400);
+                        x = rndPosition;
+                        rndPosition = 30 + arc4random() % (210);
+                        y = rndPosition;
+                        newPos = ccp(x,y);
+                        thisPool.position = newPos;
+                    }
+                }
+            }
+            sth++;
+        }
+    } while (sth < _totalPools*3);
 }
 
 #pragma mark - GAME METHODS
 
+//TODO: remove play method after all gameplay is ready
 -(void)play {
     CCScene *gameplayScene = [CCBReader loadAsScene:@"Gameplay"];
     [[CCDirector sharedDirector] replaceScene:gameplayScene];
