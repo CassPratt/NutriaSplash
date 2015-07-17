@@ -15,5 +15,8 @@
 @interface Gameplay : CCNode <CCPhysicsCollisionDelegate>
 
 @property (nonatomic, assign) int level;
+@property (nonatomic, assign) int totalNutrias;
+@property (nonatomic, assign) int totalPools;
+@property (nonatomic, assign) int totalTime;
 
 @end

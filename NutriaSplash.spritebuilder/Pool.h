@@ -11,12 +11,11 @@
 #import <Foundation/Foundation.h>
 #import "cocos2d.h"
 #import "Nutria.h"
-#import "Nutria.h"
 
 @interface Pool : CCNode
 
--(void)setNutria:(Nutria*)nutria;
-
 @property (nonatomic,weak) Nutria* lola;
+
+-(void)setNutria:(Nutria*)nutria;
 
 @end

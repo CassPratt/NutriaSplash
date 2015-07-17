@@ -10,15 +10,19 @@
 
 #pragma mark - COMPONENTS AND VARIABLES
 
+#define ARC4RANDOM_MAX 0x100000000
+
 @implementation Gameplay{
+    CCButton* _playButton;
+    // Spritebuilder set nodes
     CCPhysicsNode *_physicsNode;
     CCLabelTTF *_fishCountLabel, *_nutriaCountLabel, *_timeCountLabel;
+    CCSprite *_bTop, *_bBottom, *_bLeft, *_bRight;
+    
+    // Local variables (per level)
     CGSize phSize;
     NSDictionary *_readingLevel;
     NSDictionary *_thisLevel;
-    int _totalNutrias;
-    int _totalPools;
-    int _totalTime;
     NSMutableArray *nutrias;
     NSMutableArray *pools;
 }
@@ -37,21 +41,11 @@
     _physicsNode.collisionDelegate = self;
     phSize = _physicsNode.boundingBox.size;
     
-    // Reading level options
+    // Reading/Setting level
     [self readingLevel];
+    [self settingLevel];
     
-    srand48(arc4random());
-    for (int i = 0; i<_totalPools; i++){
-        float rndX = arc4random_uniform(phSize.width);
-        float rndY = arc4random_uniform(phSize.height);
-        
-        Pool* pool = (Pool*)[CCBReader load:@"Pool"];
-        pool.position = ccp(rndX, rndY);
-        [pools addObject:pool];
-        [_physicsNode addChild: pool];
-    }
-    
-    // Setting time
+    // Setting timer
     [self schedule:@selector(levelTimer) interval:1.0f];
 }
 
@@ -82,7 +76,54 @@
     [_physicsNode.space setDamping:newDamp];
 }
 
+-(void)settingLevel {
+    // Random positions for Pools
+    pools = [NSMutableArray array];
+    
+    // for the position of the Pool
+    float x = 0;
+    float y = 0;
+    
+    for (int i = 0; i<_totalPools; i++){
+        
+        int rndPosition;
+        // random position
+        rndPosition = 10 + arc4random() % (430);
+        x = rndPosition;
+        rndPosition = 20 + arc4random() % (230);
+        y = rndPosition;
+        
+        // setting the position
+        CGPoint thisPosition = ccp(x, y);
+        
+        Pool* pool = (Pool*)[CCBReader load:@"Pool"];
+        [pool convertPositionToPoints:self.position type:CCPositionTypePoints];
+        pool.position = thisPosition;
+        [_physicsNode addChild: pool];
+        [pools addObject:pool];
+    }
+    
+    // Randoms Pools for Nutrias
+    nutrias = [NSMutableArray array];
+    for (int j = 0 ; j<_totalNutrias; j++) {
+        Nutria* otter = (Nutria*)[CCBReader load:@"Nutria"];
+        Pool* thisPool;
+        do{
+            int rndPool = 0 + arc4random()%(_totalPools);
+            thisPool = (Pool*)[pools objectAtIndex:rndPool];
+            [thisPool setNutria:otter];
+        } while(thisPool.lola == NULL);
+            
+    }
+}
+
 #pragma mark - GAME METHODS
+
+-(void)play {
+    CCScene *gameplayScene = [CCBReader loadAsScene:@"Gameplay"];
+    [[CCDirector sharedDirector] replaceScene:gameplayScene];
+    _playButton.enabled = false;
+}
 
 // Setting correct text format in _timeCountLabel
 -(void)setTimeLabel {
@@ -109,6 +150,17 @@
     else
         _totalTime = 0;
     [self setTimeLabel];
+}
+
+#pragma mark - AT THE END
+
+- (void)dealloc {
+    [self removeAllChildrenWithCleanup:TRUE];
+    // Clean up memory allocations from sprites
+    [[CCSpriteFrameCache sharedSpriteFrameCache] removeUnusedSpriteFrames];
+    [[CCDirector sharedDirector] purgeCachedData];
+    [[CCSpriteFrameCache sharedSpriteFrameCache] removeSpriteFrames];
+    [CCSpriteFrameCache purgeSharedSpriteFrameCache];
 }
 
 @end
