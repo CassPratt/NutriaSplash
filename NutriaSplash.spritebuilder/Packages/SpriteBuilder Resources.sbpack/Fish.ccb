@@ -10,7 +10,7 @@
 		<false/>
 	</dict>
 	<key>UUID</key>
-	<integer>3</integer>
+	<integer>2</integer>
 	<key>centeredOrigin</key>
 	<false/>
 	<key>currentResolution</key>
@@ -41,12 +41,7 @@
 		<array>
 			<dict>
 				<key>UUID</key>
-				<integer>2</integer>
-				<key>animatedProperties</key>
-				<dict>
-					<key>0</key>
-					<dict/>
-				</dict>
+				<integer>1</integer>
 				<key>baseClass</key>
 				<string>CCSprite</string>
 				<key>children</key>
@@ -54,9 +49,9 @@
 				<key>customClass</key>
 				<string></string>
 				<key>displayName</key>
-				<string>Nutria</string>
+				<string>CCSprite</string>
 				<key>memberVarAssignmentName</key>
-				<string>_spriteNutria</string>
+				<string></string>
 				<key>memberVarAssignmentType</key>
 				<integer>1</integer>
 				<key>properties</key>
@@ -77,7 +72,7 @@
 						<key>value</key>
 						<array>
 							<real>0.5</real>
-							<real>0.0</real>
+							<real>0.5</real>
 							<integer>0</integer>
 							<integer>2</integer>
 							<integer>2</integer>
@@ -91,7 +86,7 @@
 						<key>value</key>
 						<array>
 							<real>0.5</real>
-							<real>0.0</real>
+							<real>0.5</real>
 						</array>
 					</dict>
 					<dict>
@@ -103,7 +98,7 @@
 						<array>
 							<real>1</real>
 							<real>1</real>
-							<true/>
+							<false/>
 							<integer>0</integer>
 						</array>
 					</dict>
@@ -115,7 +110,7 @@
 						<key>value</key>
 						<array>
 							<string></string>
-							<string>GameAssets/nutria-mitad-1.png</string>
+							<string>GameAssets/pez.png</string>
 						</array>
 					</dict>
 					<dict>
@@ -126,7 +121,7 @@
 						<key>value</key>
 						<array>
 							<string></string>
-							<string>GameAssets/nutria-mitad-1.png</string>
+							<string></string>
 						</array>
 					</dict>
 					<dict>
@@ -151,12 +146,10 @@
 						<array/>
 					</dict>
 				</array>
-				<key>selected</key>
-				<true/>
 			</dict>
 		</array>
 		<key>customClass</key>
-		<string>Nutria</string>
+		<string>Fish</string>
 		<key>displayName</key>
 		<string>CCNode</string>
 		<key>memberVarAssignmentName</key>
@@ -194,8 +187,8 @@
 				<string>Size</string>
 				<key>value</key>
 				<array>
-					<real>97</real>
-					<real>38</real>
+					<real>50</real>
+					<real>40</real>
 					<integer>0</integer>
 					<integer>0</integer>
 				</array>
@@ -208,7 +201,7 @@
 				<key>value</key>
 				<array>
 					<real>0.5</real>
-					<real>0.0</real>
+					<real>0.5</real>
 				</array>
 			</dict>
 			<dict>
@@ -225,6 +218,8 @@
 				</array>
 			</dict>
 		</array>
+		<key>selected</key>
+		<true/>
 	</dict>
 	<key>notes</key>
 	<array/>
@@ -272,15 +267,15 @@
 				<integer>12</integer>
 			</dict>
 			<key>chainedSequenceId</key>
-			<integer>0</integer>
+			<integer>-1</integer>
 			<key>length</key>
-			<real>0.96666663885116577</real>
+			<real>10</real>
 			<key>name</key>
 			<string>Default Timeline</string>
 			<key>offset</key>
 			<real>0.0</real>
 			<key>position</key>
-			<real>0.80000001192092896</real>
+			<real>0.0</real>
 			<key>resolution</key>
 			<real>30</real>
 			<key>scale</key>

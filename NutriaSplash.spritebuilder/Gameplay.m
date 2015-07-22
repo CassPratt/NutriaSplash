@@ -29,18 +29,23 @@
     NSMutableArray *targets;
     NSMutableArray *nextMoving;
     NSMutableArray *movingNutrias;
+
+    BOOL _fishShowing;
+    int _fishCount;
 }
 
 #pragma mark - INITIALIZING
 
 -(id)init{
     if (self = [super init]) {
-        _level = 1; // Will be read from singleton
+        _level = [GameData sharedData].level; // Will be read from singleton
         nutrias = [NSMutableArray array];
         pools = [NSMutableArray array];
         targets = [NSMutableArray array];
         nextMoving = [NSMutableArray array];
         movingNutrias = [NSMutableArray array];
+        _fishShowing = FALSE;
+        _fishCount = 0;
     }
     return self;
 }
@@ -151,7 +156,14 @@
 
 -(void)update:(CCTime)delta {
     if (_totalNutrias == 0)
-       [self play];
+       [self endGame];
+    
+    // Random time for showing fish
+    float rndTime = 0.5 + arc4random_uniform(3.5f);
+    if (!_fishShowing) {
+        [self scheduleOnce:@selector(showFish) delay:rndTime];
+        _fishShowing = TRUE;
+    }
 }
 
 // Showing (max) Nutrias and their targets
@@ -223,7 +235,8 @@
         // Removing pool's Nutria
         Pool *showThis = [nextMoving objectAtIndex:countPool];
         Nutria *theNutria = showThis.lola;
-        [showThis removeChild:showThis.lola];
+        if (theNutria != NULL)
+            [showThis removeChild:showThis.lola];
         showThis.lola = NULL;
         
         // theNutria has a new parent!
@@ -235,6 +248,9 @@
         
         // Getting target position
         CCSprite *toTarget = (CCSprite*)[targets objectAtIndex:[pools indexOfObject:showThis]];
+//        if (toTarget.position.x < theNutria.position.x)
+//            [theNutria changeSprite:-1];
+//        else [theNutria changeSprite:1];
         CCActionMoveTo *moveNutria = [CCActionMoveTo actionWithDuration:1.0f position:toTarget.position];
         [theNutria runAction:moveNutria];
         
@@ -246,7 +262,7 @@
     
     // Deleting existing targets
     for (CCSprite *thisTarget in targets) {
-        if (![thisTarget isKindOfClass:[NSString class]])
+        if (thisTarget != NULL && ![thisTarget isKindOfClass:[NSString class]])
             [self removeChild:thisTarget];
     }
     [targets removeAllObjects];
@@ -256,7 +272,7 @@
     }
     
     // Next is checking!
-    [self scheduleOnce:@selector(setNutriasInNewPool) delay:1.1f];
+    [self scheduleOnce:@selector(setNutriasInNewPool) delay:(_delayAfterHiding+0.1f)];
 }
 
 // Giving Nutrias a new parent, or deleting it
@@ -268,14 +284,21 @@
             float interWidth = intersection.size.width;
             float interHeight = intersection.size.height;
             int index = (int)[pools indexOfObject:thisPool];
-            if (!CGRectIsNull(intersection) && interWidth > interSize.width/2 && interHeight > interSize.height/2
+            if (thisOtter != NULL && !CGRectIsNull(intersection) && interWidth > interSize.width/2 && interHeight > interSize.height/2
                 && thisOtter.oldPool != index && thisPool.lola == NULL) {
                 [self removeChild:thisOtter];
                 thisOtter.oldPool = index;
                 [thisPool setNutria:thisOtter];
+                if (thisPool.nemo != NULL) {
+                    _fishCount++;
+                    NSLog([NSString stringWithFormat:@"Fish: %i",_fishCount]);
+                    [self setFishLabel];
+                    [thisPool removeChild:thisPool.nemo];
+                    _fishShowing = FALSE;
+                }
             }
         }
-        if (thisOtter.parent == self){
+        if (thisOtter.parent == self && thisOtter != NULL){
             _totalNutrias--;
             _countN = [NSString stringWithFormat:@"x0%i",_totalNutrias];
             [_nutriaCountLabel setString:_countN];
@@ -288,6 +311,35 @@
     
     // Next is showing!
     [self scheduleOnce:@selector(showNutrias) delay:1.0f];
+}
+
+// Show fish for incrementing score
+-(void)showFish {
+    Fish *newOne;
+    int counter = 0 + arc4random()%(_totalPools);
+    do {
+        Pool *tryThis = (Pool*)[pools objectAtIndex:counter];
+        if (tryThis.lola == NULL) {
+            newOne = (Fish*)[CCBReader load:@"Fish"];
+            [tryThis setFish:newOne];
+        }
+        counter =  0 + arc4random()%(_totalPools);
+    }while(newOne == NULL && counter < _totalPools);
+    
+    // Random time for showing fish
+    float rndTime = 3 + arc4random_uniform(4);
+    [self scheduleOnce:@selector(hideFish) delay:rndTime];
+}
+
+// SORRY! Removing fishes
+-(void)hideFish {
+    for (Pool *goGo in pools) {
+        if (goGo.nemo != NULL) {
+            [goGo removeChild:goGo.nemo];
+            goGo.nemo = NULL;
+        }
+    }
+    _fishShowing = FALSE;
 }
 
 // Checking there are no intersections between targets
@@ -313,14 +365,24 @@
     // random position
     rndPosition = 40 + arc4random() % (400);
     float x = rndPosition;
-    rndPosition = 50 + arc4random() % (190);
+    rndPosition = 50 + arc4random() % (150);
     float y = rndPosition;
-    if (y > 240)
+    if (y >= 240)
         y -= 200;
     
     // setting the position
     CGPoint thisPosition = ccp(x, y);
     return thisPosition;
+}
+
+// Setting correct text format in _fishCountLabel
+-(void)setFishLabel {
+    NSString *thisCount;
+    if (_fishCount < 10)
+        thisCount = [NSString stringWithFormat:@"x0%i",_fishCount];
+    else
+        thisCount = [NSString stringWithFormat:@"x%i",_fishCount];
+    [_fishCountLabel setString:thisCount];
 }
 
 // Setting correct text format in _timeCountLabel
@@ -347,13 +409,16 @@
         _totalTime--;
     else  if (_totalTime == 0){
         _totalTime = 0;
-        [self play];
+        [self endGame];
     }
     [self setTimeLabel];
 }
 
-//TODO: remove play method after all gameplay is ready
--(void)play {
+//TODO: check winning or losing conditions
+-(void)endGame {
+    if (_level == 1)
+        _level++;
+    else _level--;
     CCScene *gameplayScene = [CCBReader loadAsScene:@"Gameplay"];
     [[CCDirector sharedDirector] replaceScene:gameplayScene];
     _playButton.enabled = false;

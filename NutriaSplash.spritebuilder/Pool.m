@@ -38,10 +38,18 @@
 
 -(void)setNutria:(Nutria*)nutria{
     _lola = nutria;
+//    [_lola changeSprite:0];
     _lola.anchorPoint = ccp(0.5,0);
     _lola.position = ccp(self.contentSize.width/2, self.contentSize.height/2);
     [self addChild:nutria];
-//    _lola.visible = FALSE;
+}
+
+-(void)setFish:(Fish *)fish{
+    _nemo = fish;
+    _nemo.anchorPoint = ccp(0.5,0.3);
+    _nemo.scale = 0.8;
+    _nemo.position = ccp(self.contentSize.width/2, self.contentSize.height/2);
+    [self addChild:_nemo];
 }
 
 #pragma mark - TOUCH METHODS

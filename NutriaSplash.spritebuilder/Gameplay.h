@@ -11,6 +11,8 @@
 #import "CCPhysics+ObjectiveChipmunk.h"
 
 #import "Pool.h"
+#import "Fish.h"
+#import "GameData.h"
 
 @interface Gameplay : CCNode <CCPhysicsCollisionDelegate>
 

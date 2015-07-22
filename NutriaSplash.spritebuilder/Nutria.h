@@ -13,4 +13,6 @@
 
 @property (nonatomic, assign) int oldPool;
 
+-(void)changeSprite:(int)flip;
+
 @end

@@ -9,7 +9,9 @@
 #import "Nutria.h"
 
 
-@implementation Nutria
+@implementation Nutria {
+    CCSprite *_spriteNutria;
+}
 
 #pragma mark - INITIALIZING
 
@@ -25,5 +27,17 @@
 }
 
 #pragma mark - NUTRIA METHODS
+
+-(void)changeSprite:(int)flip {
+    NSString *newString = @"GameAssets/nutria-saltando.png";
+    if (flip != -1)
+        _spriteNutria.flipX = FALSE;
+    if (flip < 0)
+        _spriteNutria.flipX = TRUE;
+    else if (flip == 0){
+        newString = @"GameAssets/nutria-mitad-1.png";
+    }
+    [_spriteNutria setTexture:[CCTexture textureWithFile:newString]];
+}
 
 @end

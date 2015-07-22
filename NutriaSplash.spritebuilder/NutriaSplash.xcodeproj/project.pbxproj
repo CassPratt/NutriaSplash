@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1A2ED5BD1B5F2E770010C25B /* GameData.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A2ED5BC1B5F2E770010C25B /* GameData.m */; };
+		1A2ED5BE1B5F2E770010C25B /* GameData.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A2ED5BC1B5F2E770010C25B /* GameData.m */; };
+		1A2ED5BF1B5F2E770010C25B /* GameData.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A2ED5BC1B5F2E770010C25B /* GameData.m */; };
+		1A2ED5C21B5F35310010C25B /* Fish.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A2ED5C11B5F35310010C25B /* Fish.m */; };
+		1A2ED5C31B5F35310010C25B /* Fish.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A2ED5C11B5F35310010C25B /* Fish.m */; };
+		1A2ED5C41B5F35310010C25B /* Fish.m in Sources */ = {isa = PBXBuildFile; fileRef = 1A2ED5C11B5F35310010C25B /* Fish.m */; };
 		1A43F4D91B3F189800009E9B /* Levels.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1A43F4D81B3F189800009E9B /* Levels.plist */; };
 		1A43F4DA1B3F189800009E9B /* Levels.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1A43F4D81B3F189800009E9B /* Levels.plist */; };
 		1A43F4DB1B3F189800009E9B /* Levels.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1A43F4D81B3F189800009E9B /* Levels.plist */; };
@@ -155,6 +161,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1A2ED5BB1B5F2E770010C25B /* GameData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GameData.h; sourceTree = "<group>"; };
+		1A2ED5BC1B5F2E770010C25B /* GameData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GameData.m; sourceTree = "<group>"; };
+		1A2ED5C01B5F35310010C25B /* Fish.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Fish.h; sourceTree = "<group>"; };
+		1A2ED5C11B5F35310010C25B /* Fish.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Fish.m; sourceTree = "<group>"; };
 		1A43F4D81B3F189800009E9B /* Levels.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Levels.plist; sourceTree = "<group>"; };
 		5B12100919748273004C1E1D /* libEGL.so */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libEGL.so; path = /usr/lib/armv7a/libEGL.so; sourceTree = SDKROOT; };
 		5B12100F197483EE004C1E1D /* ic_launcher.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ic_launcher.png; sourceTree = "<group>"; };
@@ -451,14 +461,18 @@
 			children = (
 				7A40362019DDEF0D007B6E8F /* Platforms */,
 				1A43F4D81B3F189800009E9B /* Levels.plist */,
-				5B983AC41B3F132A00A3E946 /* Gameplay.h */,
-				5B983AC51B3F132A00A3E946 /* Gameplay.m */,
 				B7378992180767190076A88C /* MainScene.h */,
 				B7378993180767190076A88C /* MainScene.m */,
+				1A2ED5BB1B5F2E770010C25B /* GameData.h */,
+				1A2ED5BC1B5F2E770010C25B /* GameData.m */,
+				5B983AC41B3F132A00A3E946 /* Gameplay.h */,
+				5B983AC51B3F132A00A3E946 /* Gameplay.m */,
 				5B983AED1B3F68FA00A3E946 /* Nutria.h */,
 				5B983AEE1B3F68FA00A3E946 /* Nutria.m */,
 				5B983ADC1B3F4AC400A3E946 /* Pool.h */,
 				5B983ADD1B3F4AC400A3E946 /* Pool.m */,
+				1A2ED5C01B5F35310010C25B /* Fish.h */,
+				1A2ED5C11B5F35310010C25B /* Fish.m */,
 				D352B48019EC608A00829775 /* MetalShaders */,
 			);
 			name = Source;
@@ -820,7 +834,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1A2ED5C41B5F35310010C25B /* Fish.m in Sources */,
 				7A4036E819DE3F33007B6E8F /* MainScene.m in Sources */,
+				1A2ED5BF1B5F2E770010C25B /* GameData.m in Sources */,
 				7A40360419DDEE84007B6E8F /* main.m in Sources */,
 				7A59498E19E3941300F65F90 /* AppDelegate.m in Sources */,
 			);
@@ -830,8 +846,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1A2ED5BE1B5F2E770010C25B /* GameData.m in Sources */,
 				927F619E196C771E000F43EF /* MainScene.m in Sources */,
 				5B121030197484FA004C1E1D /* NutriaSplashActivity.m in Sources */,
+				1A2ED5C31B5F35310010C25B /* Fish.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -842,8 +860,10 @@
 				5B983ADE1B3F4AC500A3E946 /* Pool.m in Sources */,
 				B73789871807631A0076A88C /* main.m in Sources */,
 				5B983AC61B3F132A00A3E946 /* Gameplay.m in Sources */,
+				1A2ED5C21B5F35310010C25B /* Fish.m in Sources */,
 				7A046D8C19E8A20E004C4763 /* MainScene.m in Sources */,
 				5B983AEF1B3F68FA00A3E946 /* Nutria.m in Sources */,
+				1A2ED5BD1B5F2E770010C25B /* GameData.m in Sources */,
 				5B121038197487F2004C1E1D /* AppDelegate.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

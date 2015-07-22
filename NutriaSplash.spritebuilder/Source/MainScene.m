@@ -17,6 +17,8 @@
 
 -(void)didLoadFromCCB {
     [[OALSimpleAudio sharedInstance] playBgWithLoop:YES];
+    
+    [GameData sharedData].level = 1;
 }
 
 #pragma mark - SCENE METHODS
@@ -27,6 +29,7 @@
     _playButton.enabled = false;
     CCScene *gameplayScene = [CCBReader loadAsScene:@"Gameplay"];
     [[OALSimpleAudio sharedInstance] stopBg];
+    [[OALSimpleAudio sharedInstance] playEffect:@"GameAudio/blopEffect.wav"];
     [[CCDirector sharedDirector] replaceScene:gameplayScene];
 }
 
