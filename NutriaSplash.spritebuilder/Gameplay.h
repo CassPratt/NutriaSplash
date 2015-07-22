@@ -18,5 +18,8 @@
 @property (nonatomic, assign) int totalNutrias;
 @property (nonatomic, assign) int totalPools;
 @property (nonatomic, assign) int totalTime;
+@property (nonatomic, assign) float showingTime;
+@property (nonatomic, assign) float delayAfterHiding;
+@property (nonatomic, assign) int maxShown;
 
 @end

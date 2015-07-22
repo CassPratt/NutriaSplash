@@ -13,6 +13,7 @@
 @implementation Pool{
     CGPoint firstTouch;
     CGPoint lastTouch;
+    CCSprite *_water; // For Nutria collision
 }
 
 #pragma mark - INITIALIZING
@@ -37,8 +38,9 @@
 
 -(void)setNutria:(Nutria*)nutria{
     _lola = nutria;
+    _lola.anchorPoint = ccp(0.5,0);
     _lola.position = ccp(self.contentSize.width/2, self.contentSize.height/2);
-    [self addChild:_lola];
+    [self addChild:nutria];
 //    _lola.visible = FALSE;
 }
 

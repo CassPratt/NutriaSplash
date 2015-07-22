@@ -15,8 +15,15 @@
 
 -(id)init{
     if([super init]){
+        _oldPool = 0;
     }
     return self;
 }
+
+-(void)didLoadFromCCB {
+    self.physicsBody.collisionType = @"nutria";
+}
+
+#pragma mark - NUTRIA METHODS
 
 @end

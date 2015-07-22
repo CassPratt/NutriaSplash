@@ -20,11 +20,15 @@
     CCSprite *_bTop, *_bBottom, *_bLeft, *_bRight;
     
     // Local variables (per level)
-    CGSize phSize;
+    CGSize interSize;
     NSDictionary *_readingLevel;
     NSDictionary *_thisLevel;
+    NSString *_countN;
     NSMutableArray *nutrias;
     NSMutableArray *pools;
+    NSMutableArray *targets;
+    NSMutableArray *nextMoving;
+    NSMutableArray *movingNutrias;
 }
 
 #pragma mark - INITIALIZING
@@ -32,6 +36,11 @@
 -(id)init{
     if (self = [super init]) {
         _level = 1; // Will be read from singleton
+        nutrias = [NSMutableArray array];
+        pools = [NSMutableArray array];
+        targets = [NSMutableArray array];
+        nextMoving = [NSMutableArray array];
+        movingNutrias = [NSMutableArray array];
     }
     return self;
 }
@@ -40,7 +49,6 @@
     //_physicsNode.debugDraw = TRUE;
     _physicsNode.collisionDelegate = self;
     _physicsNode.name = @"physicsNode";
-    phSize = _physicsNode.boundingBox.size;
     
     // Reading/Setting level
     [self readingLevel];
@@ -48,8 +56,12 @@
     
     // Setting timer
     [self schedule:@selector(levelTimer) interval:1.0f];
+    
+    // Will show Nutrias for the first time!
+    [self scheduleOnce:@selector(showNutrias) delay:2.0f];
 }
 
+// Obtaining level info from plist "Levels"
 -(void)readingLevel {
     // Reading Level options from Levels' plist
     NSString *strLevel = [NSString stringWithFormat:@"Level%i",_level];
@@ -59,14 +71,24 @@
     
     // Getting number of Nutrias
     _totalNutrias = [[_thisLevel objectForKey:@"totalNutrias"] intValue];
-    NSString *countN;
     if (_totalNutrias < 10)
-        countN = [NSString stringWithFormat:@"x0%i",_totalNutrias];
-    else countN = [NSString stringWithFormat:@"x%i",_totalNutrias];
-    [_nutriaCountLabel setString:countN];
+        _countN = [NSString stringWithFormat:@"x0%i",_totalNutrias];
+    else _countN = [NSString stringWithFormat:@"x%i",_totalNutrias];
+    [_nutriaCountLabel setString:_countN];
+    // Max. number of Nutrias shown
+    _maxShown = [[_thisLevel objectForKey:@"maxShown"] intValue];
+    
+    // Time for showing the Nutrias
+    _showingTime = [[_thisLevel objectForKey:@"showingTime"] floatValue];
+    // Time before moving the Nutrias
+    _delayAfterHiding = [[_thisLevel objectForKey:@"delayAfterHiding"] floatValue];
 
     // Getting number of pools
-    _totalPools = _totalNutrias * 2;
+    _totalPools = _totalNutrias + _maxShown;
+    for (int i = 0; i<_totalPools; i++) {
+        NSString *nothing = [[NSString string] init];
+        [targets addObject:nothing];
+    }
     
     // Getting level time
     _totalTime = [[_thisLevel objectForKey:@"time"] intValue];
@@ -77,30 +99,14 @@
     [_physicsNode.space setDamping:newDamp];
 }
 
-// Adding Pools randomly
+// Adding Pools and Nutrias randomly
 -(void)settingLevel {
+    
     // Random positions for Pools
-    pools = [NSMutableArray array];
-    
-    // for the position of the Pool
-    float x = 0;
-    float y = 0;
-    
     for (int i = 0; i<_totalPools; i++){
-        
-        int rndPosition;
-        // random position
-        rndPosition = 40 + arc4random() % (400);
-        x = rndPosition;
-        rndPosition = 30 + arc4random() % (210);
-        y = rndPosition;
-        
-        // setting the position
-        CGPoint thisPosition = ccp(x, y);
-        
         Pool* pool = (Pool*)[CCBReader load:@"Pool"];
         pool.positionType = CCPositionTypePoints;
-        pool.position = thisPosition;
+        pool.position = [self randomPositionInScreen];
         [_physicsNode addChild: pool];
         if (CGRectContainsRect(_physicsNode.boundingBox, pool.boundingBox))
             pool.position = ccp(100,100);
@@ -111,35 +117,29 @@
     
     // Pools for Nutrias
     int numPool = 0;
-    nutrias = [NSMutableArray array];
     for (int j = 0 ; j<_totalNutrias; j++) {
         Nutria* otter = (Nutria*)[CCBReader load:@"Nutria"];
         Pool* thisPool = (Pool*)[pools objectAtIndex:numPool];
+        otter.oldPool = numPool;
         [thisPool setNutria:otter];
+        [nutrias addObject:otter];
         numPool++;
     }
+    
+    // For intersection with Pools
+    interSize = ((Nutria*)[nutrias objectAtIndex:0]).boundingBox.size;
 }
 
 // Checking there are no intersections between pools
 -(void)checkPoolsPosition {
-    
-    CGPoint newPos;
-    int rndPosition, x=0, y=0;
-    // random position
     int sth = 0;
     do{
         for (int i = 0; i<_totalPools; i++) {
             Pool *thisPool = (Pool*)[pools objectAtIndex:i];
             for (Pool *toCompare in pools) {
                 if (![toCompare isEqual:thisPool]) {
-                    if (CGRectIntersectsRect(thisPool.boundingBox, toCompare.boundingBox)) {
-                        rndPosition = 40 + arc4random() % (400);
-                        x = rndPosition;
-                        rndPosition = 30 + arc4random() % (210);
-                        y = rndPosition;
-                        newPos = ccp(x,y);
-                        thisPool.position = newPos;
-                    }
+                    if (CGRectIntersectsRect(thisPool.boundingBox, toCompare.boundingBox))
+                        thisPool.position = [self randomPositionInScreen];
                 }
             }
             sth++;
@@ -149,11 +149,178 @@
 
 #pragma mark - GAME METHODS
 
-//TODO: remove play method after all gameplay is ready
--(void)play {
-    CCScene *gameplayScene = [CCBReader loadAsScene:@"Gameplay"];
-    [[CCDirector sharedDirector] replaceScene:gameplayScene];
-    _playButton.enabled = false;
+-(void)update:(CCTime)delta {
+    if (_totalNutrias == 0)
+       [self play];
+}
+
+// Showing (max) Nutrias and their targets
+-(void)showNutrias {
+    
+    for (Nutria *toHide in nutrias) {
+        if (toHide.visible)
+            toHide.visible = FALSE;
+    }
+    
+    // Showing a certain number of Nutrias at a time ([1,_maxShown])
+    int rndShow;
+    if (_totalNutrias > (_maxShown-_totalNutrias))
+        rndShow = 1 + arc4random()%(_maxShown);
+    else
+        rndShow = 1;
+    
+    Pool *tryThis;
+    int foundPools = 0;
+    int countPools = 0;
+    while (foundPools < rndShow) {
+        if (countPools < _totalPools) {
+            tryThis = (Pool*)[pools objectAtIndex:countPools];
+            if (tryThis.lola != NULL && !tryThis.lola.visible) {
+                CCSprite *theTarget = [[CCSprite alloc] initWithImageNamed:@"GameAssets/target.png"];
+                theTarget.positionType = CCPositionTypePoints;
+                theTarget.anchorPoint = ccp(0.5,0.5);
+                theTarget.position = [self randomPositionInScreen];
+                
+                // Adding the target to its array
+                int indexOfTar = (int)[pools indexOfObject:tryThis];
+                [targets setObject:theTarget atIndexedSubscript:indexOfTar];
+                [self addChild:theTarget];
+                
+                [tryThis.lola setVisible:TRUE];
+                [nextMoving addObject:tryThis];
+
+                foundPools++;
+            }
+            countPools++;
+        } else if (_totalNutrias > 1)
+            countPools = 0;
+    }
+    
+    // Next is hiding!
+    [self scheduleOnce:@selector(hideNutrias) delay:_showingTime];
+}
+
+// Hiding Nutrias after a certain time
+-(void)hideNutrias {
+    for (Pool *thisPool in nextMoving) {
+        if (thisPool.lola.visible) {
+            [thisPool.lola setVisible:FALSE];
+            int pos = (int)[pools indexOfObject:thisPool];
+            CCSprite *oneTar = (CCSprite*)[targets objectAtIndex:pos];
+            [oneTar setVisible:FALSE];
+        }
+    }
+    
+    // Next is moving!
+    [self scheduleOnce:@selector(moveNutrias) delay:_delayAfterHiding];
+}
+
+// Moving the Nutrias
+-(void)moveNutrias {
+    
+    int countPool = 0;
+    for (int i = 0; i<[nextMoving count]; i++) {
+        // Removing pool's Nutria
+        Pool *showThis = [nextMoving objectAtIndex:countPool];
+        Nutria *theNutria = showThis.lola;
+        [showThis removeChild:showThis.lola];
+        showThis.lola = NULL;
+        
+        // theNutria has a new parent!
+        theNutria.anchorPoint = ccp(0.5,0);
+        theNutria.position = ccp(showThis.position.x-5,showThis.position.y);
+        [self addChild:theNutria];
+        [movingNutrias addObject:theNutria];
+        [theNutria setVisible:TRUE];
+        
+        // Getting target position
+        CCSprite *toTarget = (CCSprite*)[targets objectAtIndex:[pools indexOfObject:showThis]];
+        CCActionMoveTo *moveNutria = [CCActionMoveTo actionWithDuration:1.0f position:toTarget.position];
+        [theNutria runAction:moveNutria];
+        
+        countPool++;
+    }
+    
+    // Deleting items for old moving
+    [nextMoving removeAllObjects];
+    
+    // Deleting existing targets
+    for (CCSprite *thisTarget in targets) {
+        if (![thisTarget isKindOfClass:[NSString class]])
+            [self removeChild:thisTarget];
+    }
+    [targets removeAllObjects];
+    for (int i = 0; i<_totalPools; i++) {
+        NSString *nothing = [[NSString string] init];
+        [targets addObject:nothing];
+    }
+    
+    // Next is checking!
+    [self scheduleOnce:@selector(setNutriasInNewPool) delay:1.1f];
+}
+
+// Giving Nutrias a new parent, or deleting it
+-(void)setNutriasInNewPool {
+    for (Nutria *thisOtter in movingNutrias) {
+        // Checking if the Nutria intersects with a Pool (not the original) 
+        for (Pool *thisPool in pools) {
+            CGRect intersection = CGRectIntersection(thisOtter.boundingBox, thisPool.boundingBox);
+            float interWidth = intersection.size.width;
+            float interHeight = intersection.size.height;
+            int index = (int)[pools indexOfObject:thisPool];
+            if (!CGRectIsNull(intersection) && interWidth > interSize.width/2 && interHeight > interSize.height/2
+                && thisOtter.oldPool != index && thisPool.lola == NULL) {
+                [self removeChild:thisOtter];
+                thisOtter.oldPool = index;
+                [thisPool setNutria:thisOtter];
+            }
+        }
+        if (thisOtter.parent == self){
+            _totalNutrias--;
+            _countN = [NSString stringWithFormat:@"x0%i",_totalNutrias];
+            [_nutriaCountLabel setString:_countN];
+            [self removeChild:thisOtter];
+            [nutrias removeObject:thisOtter];
+        }
+    }
+    [nextMoving removeAllObjects];
+    [movingNutrias removeAllObjects];
+    
+    // Next is showing!
+    [self scheduleOnce:@selector(showNutrias) delay:1.0f];
+}
+
+// Checking there are no intersections between targets
+-(void)checkTargetsPosition {
+    int sth = 0;
+    do{
+        for (CCSprite *thisTarget in targets) {
+            if (![thisTarget isKindOfClass:[NSString class]]){
+                for (CCSprite *toCompare in targets) {
+                    if (![toCompare isEqual:thisTarget]){
+                        if (CGRectIntersectsRect(thisTarget.boundingBox, toCompare.boundingBox))
+                            thisTarget.position = [self randomPositionInScreen];
+                    }
+                }
+            }
+        }
+    } while (sth < _totalNutrias*2);
+}
+
+// Getting random position in screen
+-(CGPoint)randomPositionInScreen {
+    int rndPosition;
+    // random position
+    rndPosition = 40 + arc4random() % (400);
+    float x = rndPosition;
+    rndPosition = 50 + arc4random() % (190);
+    float y = rndPosition;
+    if (y > 240)
+        y -= 200;
+    
+    // setting the position
+    CGPoint thisPosition = ccp(x, y);
+    return thisPosition;
 }
 
 // Setting correct text format in _timeCountLabel
@@ -178,9 +345,18 @@
 -(void)levelTimer {
     if (_totalTime > 0)
         _totalTime--;
-    else
+    else  if (_totalTime == 0){
         _totalTime = 0;
+        [self play];
+    }
     [self setTimeLabel];
+}
+
+//TODO: remove play method after all gameplay is ready
+-(void)play {
+    CCScene *gameplayScene = [CCBReader loadAsScene:@"Gameplay"];
+    [[CCDirector sharedDirector] replaceScene:gameplayScene];
+    _playButton.enabled = false;
 }
 
 #pragma mark - AT THE END

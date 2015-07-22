@@ -59,6 +59,8 @@
 
 - (CCScene*) startScene
 {
+    [[OALSimpleAudio sharedInstance] preloadBg:@"GameAudio/introTrack.wav"];
+    [[OALSimpleAudio sharedInstance] preloadEffect:@"GameAudio/blopEffect.wav"];
     return [CCBReader loadAsScene:@"MainScene"];
 }
 

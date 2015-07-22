@@ -15,12 +15,19 @@
     return self;
 }
 
+-(void)didLoadFromCCB {
+    [[OALSimpleAudio sharedInstance] playBgWithLoop:YES];
+}
+
 #pragma mark - SCENE METHODS
 
+//TODO: Create Level Menu
+// Going to Gameplay Scene
 -(void)play {
-    CCScene *gameplayScene = [CCBReader loadAsScene:@"Gameplay"];
-    [[CCDirector sharedDirector] replaceScene:gameplayScene];
     _playButton.enabled = false;
+    CCScene *gameplayScene = [CCBReader loadAsScene:@"Gameplay"];
+    [[OALSimpleAudio sharedInstance] stopBg];
+    [[CCDirector sharedDirector] replaceScene:gameplayScene];
 }
 
 @end

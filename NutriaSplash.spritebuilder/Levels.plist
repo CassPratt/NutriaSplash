@@ -9,11 +9,32 @@
 		<key>totalNutrias</key>
 		<integer>2</integer>
 		<key>time</key>
-		<integer>20</integer>
+		<integer>30</integer>
 		<key>damping</key>
 		<real>0.65</real>
 		<key>maxShown</key>
 		<integer>1</integer>
+		<key>showingTime</key>
+		<string>2</string>
+		<key>delayAfterHiding</key>
+		<string>1</string>
+	</dict>
+	<key>Level2</key>
+	<dict>
+		<key>level</key>
+		<integer>2</integer>
+		<key>totalNutrias</key>
+		<integer>2</integer>
+		<key>time</key>
+		<integer>30</integer>
+		<key>damping</key>
+		<real>0.65</real>
+		<key>maxShown</key>
+		<integer>2</integer>
+		<key>showingTime</key>
+		<string>2</string>
+		<key>delayAfterHiding</key>
+		<string>1</string>
 	</dict>
 </dict>
 </plist>

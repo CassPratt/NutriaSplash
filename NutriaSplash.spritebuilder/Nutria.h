@@ -11,4 +11,6 @@
 
 @interface Nutria : CCNode
 
+@property (nonatomic, assign) int oldPool;
+
 @end
